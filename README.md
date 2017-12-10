@@ -2,7 +2,7 @@
 
 **In my project I have included the following criteria**
 
-*User interaction 
+* User interaction 
 *Basic collision detection 
 *Cartesian to polar coordinates 
 *Illustration of 
