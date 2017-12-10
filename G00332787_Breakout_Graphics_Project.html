@@ -108,6 +108,7 @@
                     // if the ball is above the paddle then bounce it off th baddle
                     else if ((this.y >= canvas.height - this.radius - (paddle.height + 10)) && (this.x > paddle.x && this.x < paddle.x + paddle.width)){     
                         this.dy *= -1;
+                        console.log("The ball touched the paddle!");
                     } 
                     
                     // if the ball reaches the bottom part of the canvas it's game over
@@ -204,6 +205,7 @@
                             if((ball1.x > b.x && ball1.x < b.x+brickWidth && ball1.y > b.y && ball1.y < b.y+brickHeight) || (ball2.x > b.x && ball2.x < b.x+brickWidth && ball2.y > b.y && ball2.y < b.y+brickHeight)){
                                 ball1.dy *= -1;
                                 ball2.dy *= -1;
+                                console.log("The brick was hit!");
                                 b.hit = 0; 
                             }
                         }
