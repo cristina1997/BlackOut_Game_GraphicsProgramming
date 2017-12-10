@@ -1,6 +1,6 @@
 # BlackOut_Game_GraphicsProgramming
 
-**In my project I have included the following criteria**
+**In my project I have included the following criteria from the [Graphics Programming Project Guide](https://github.com/cristina1997/BlackOut_Game_GraphicsProgramming/blob/master/Graphics%20Programming%20Project.pdf)**
 
 ***
 
