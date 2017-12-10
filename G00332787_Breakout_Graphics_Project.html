@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Gamedev Canvas Workshop</title>
+        <style>
+            * { 
+                padding: 0; 
+                margin: 0; 
+            }
+            canvas { 
+                /* background: cadetblue; */
+                background: burlywood;
+                display: block; 
+                margin: auto; 
+            }
+
+            img {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+
+        <img src="children.jpg" id="children">
+        <canvas id="myCanvas" width="800" height="450"></canvas>
+
+        <script>
+            var canvas = document.getElementById("myCanvas");
+            var ctx = canvas.getContext("2d");
+
+            //Removes all shapes on the canvas	
+            function clear (){
+                ctx.clearRect(0, 0, canvas.width, canvas.height) 
+            }//clear
+
+            // Paddle class
+            class Paddle {
+                constructor(x, y, width, height, color){
+                    this.width = width;
+                    this.height = height;
+                    this.color = color;
+                    this.x = x;
+                    this.y = y;
+                }
+
+                draw() {
+                    ctx.beginPath(); // start drawing
+                    ctx.rect(this.x, this.y, this.width, this.height); // draw a rectangle with x and y being the top left corner and the width and the height representing the rectangle's width and height
+                    ctx.fillStyle = this.color; // chose a colour to fill the rectangle
+                    ctx.fill(); // fill the rectangle with a colour
+                    ctx.stroke(); // outline the rectangle
+                    ctx.closePath(); // finish the drawing
+                
+                }
+
+            }
+            var paddle = new Paddle(300, 430, 100, 16, "black"); // create a variable for Paddle class
+
+            // Ball class
+            class Ball {
+                constructor(x, y, radius, dx, dy, color, rotateVal){
+                    this.x = x;
+                    this.y = y;
+                    this.radius = radius;
+                    this.dx = dx;
+                    this.dy = dy;
+                    this.color = color;
+                    this.rotateVal = rotateVal;
+                    this.tempRadius = radius;
+                }
+
+                draw(){
+                    ctx.beginPath(); //begin drawing the circle
+                    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false); //draw circle
+                    ctx.fillStyle = this.color;							
+                    ctx.fill(); //fill the circle with the colour    
+                    this.pizzaSlices();           	
+                    ctx.stroke(); //draw a line to outline the circle
+                }//draw
+
+                pizzaSlices(){
+                    var nextAngle;                
+                    for(var i=0; i<7; i++){	
+                        nextAngle = (((i + 1) * 2/7) + this.rotateVal) * Math.PI; //update next angle to rotate the pizza
+                        ctx.moveTo(this.x, this.y); //draw from centre to circle
+                        ctx.lineTo(this.x + (this.radius * Math.cos(nextAngle)), this.y + (this.radius * Math.sin(nextAngle))); //draw the line from circle to centre							
+                            
+                    }//for
+                }//pizzaSlices	
+        
+                //Rotate the pizza
+                rotate(){	
+                    this.rotateVal += 0.02;	
+                }//rotate
+
+                move(){
+                    this.bounce();
+                    this.y += this.dy; //Update the y location using speed/valocity  
+                    this.x += this.dx; //Update the y location using speed/valocity                
+                }//move
+
+                bounce (){      
+                    //Change direction of ball if it hits bottom and top of the canvas
+                    if(this.y <=0 + this.radius) {
+                        this.dy *= -1 /** friction*/; //multiply -1 to valocity to make it bounce back and reverse
+                    }
+                    // if the ball is above the paddle then bounce it off th baddle
+                    else if ((this.y >= canvas.height - this.radius - (paddle.height + 10)) && (this.x > paddle.x && this.x < paddle.x + paddle.width)){     
+                        this.dy *= -1;
+                    } 
+                    
+                    // if the ball reaches the bottom part of the canvas it's game over
+                    if (this.y >= canvas.height - this.radius){
+                        alert("Game Over");
+                        document.location.reload();
+                    }
+
+                    //Change direction of ball if it hits the right side of the canvas   
+                    if ((this.x >= canvas.width - this.radius)){
+                        this.dx = -1;                       
+                    }//if  
+
+                    //Change direction of ball if it hits the left side of the canvas  
+                    if(this.x <= 0 + this.radius){
+                        if (this.dx <= 0){
+                            this.dx *= -1;
+                        }
+                    }
+
+                }//bounce
+
+                resize(){	
+                    var addRadius = .05
+                    
+                    //Change radius length
+                    if (this.radius >  this.x || this.radius > this.y){				
+                        addRadius *= -1;		
+                    } else if (this.radius == 0){
+                        addRadius *= -1;	
+                    }//if/else..if
+                    //Makes sure the ball doesn't cross over the canvas width or height and become blocked
+                    if ((this.x + this.radius) > (canvas.width - this.radius) || (this.y + this.radius) > (canvas.height - this.radius) || (this.x - this.radius) < this.radius || (this.y - this.radius) < this.radius){			
+                        
+                    } else {
+                        this.radius += addRadius; //increases radius	
+
+                        // if the radius is bigger than 20 then bring it back to the original value that the radius had
+                        if (this.radius > 20) {
+                            this.radius = this.tempRadius;
+                                
+                        }
+                    
+                    }//if/else..if				
+                }//resize function
+            }
+            var ball1 = new Ball(180, 230, 10, 3.5, 3.5, "red", 0); // create ball 1
+            var ball2 = new Ball(200, 250, 10, 3.5, 3.5, "pink", 0); // create ball 2
+            var allBalls = [ball1, ball2]; // create an array of balls
+
+            // Bricks class
+            class Bricks {
+                constructor (rowCount, colCount, width, height, padding, offsetTop, offsetLeft){
+                    this.rowCount = rowCount;
+                    this.colCount = colCount;
+                    this.width = width;
+                    this.height = height;
+                    this.padding = padding;
+                    this.offsetTop = offsetTop;
+                    this.offsetLeft = offsetLeft;
+                }                
+            }
+            var bricks = new Bricks(6, 9, 75, 20, 10, 30, 30); // create a variable for Bricks class to give the bricks the appropriate values
+
+            
+            var brickRowCount = bricks.rowCount;
+            var brickColumnCount = bricks.colCount;
+            var brickWidth = bricks.width;
+            var brickHeight = bricks.height;
+            var brickPadding = bricks.padding;
+            var brickOffsetTop = bricks.offsetTop;
+            var brickOffsetLeft = bricks.offsetLeft;
+
+            // creates the bricks as an array and gives them values for x, y and hit (hit or not hit)
+            var bricks = [];
+            for(i = 0; i < brickColumnCount; i++) {
+                bricks[i] = [];
+                for(j = 0; j < brickRowCount; j++) {     
+                    //  = 1 means the brick was not hit or is still visible               
+                    bricks[i][j] = { x: 0, y: 0, hit: 1 };
+                } // j for
+            } // i for
+
+            // detet collision between bricks and the balls
+            function collisionDetection() {
+                for(i = 0; i < brickColumnCount; i++) {
+                    for(j = 0; j < brickRowCount; j++) {
+                        // create a new variable that holds the bricks array
+                        var b = bricks[i][j];
+
+                        // only bounce 
+                        if(b.hit == 1) {
+                            // every time the ball hits a brick wall it bounces back and gives its hit a value of 0
+                            if((ball1.x > b.x && ball1.x < b.x+brickWidth && ball1.y > b.y && ball1.y < b.y+brickHeight) || (ball2.x > b.x && ball2.x < b.x+brickWidth && ball2.y > b.y && ball2.y < b.y+brickHeight)){
+                                ball1.dy *= -1;
+                                ball2.dy *= -1;
+                                b.hit = 0; 
+                            }
+                        }
+                    }
+                }
+            } // collisionDetection
+
+            
+            function drawBricks() {
+                for(i = 0; i < brickColumnCount; i++) {
+                    // draw columns
+
+                    for(j = 0; j < brickRowCount; j++) {
+                        // draw rows
+
+                        // only bricks that have hit 1 are drawn
+                        if(bricks[i][j].hit == 1) {
+                            var brickX = (i * (brickWidth + brickPadding)) + brickOffsetLeft; // give the bricks paddings and set the columns to the left hand side of the canvas that isn't already drawn on
+                            var brickY = (j * (brickHeight + brickPadding)) + brickOffsetTop; // same as above but with rows instead of bricks
+                            // tell the bricks where to start the drawing on the X and Y positions
+                            bricks[i][j].x = brickX;
+                            bricks[i][j].y = brickY;
+                            ctx.beginPath();
+                            ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                            // takes the image with id = "children" and sets it ass the fillStyle of the bricks
+                            var img=document.getElementById("children");
+                            var pat = ctx.createPattern(img,"repeat");
+                            ctx.fillStyle = pat;                            
+                            ctx.fill();
+                            ctx.closePath();
+                        }
+                    }
+                }
+            } // drawBricks()
+
+            keyCodes = {
+                SPACE: 32,
+                LEFT : 37,
+                RIGHT: 39
+            }
+
+
+            var isPaused = false; 
+            var dxTempBall1, dyTempBall1, dxTempBall2, dxTempBall2; // give temporary values to dx and dy
+            document.addEventListener("keydown", function(e){                   
+                switch(e.keyCode){
+                    case keyCodes.SPACE:
+                        
+                        if (!isPaused){
+                            // when the game is paused, hold velocity values in temporary variables and set the valocity to 0
+                            dxTempBall1 = ball1.dx;
+                            dyTempBall1 = ball1.dy;  
+                            dxTempBall2 = ball2.dx;
+                            dyTempBall2 = ball2.dy;                           
+
+                            ball1.dx = 0;
+                            ball1.dy = 0;
+                            ball2.dx = 0;
+                            ball2.dy = 0;
+
+                            isPaused = true;                            
+                        }              
+                        else if (isPaused){
+                            // when the game is not paused anymore, set the velocity value back to its original values that were stored in the temporary variables
+                            ball1.dx = dxTempBall1;
+                            ball1.dy = dyTempBall1;
+                            ball2.dx = dxTempBall2;
+                            ball2.dy = dyTempBall2
+
+                            isPaused = false;
+                        }
+                        break;
+                    case keyCodes.LEFT:
+                        paddle.x -= 20;
+                        break;
+                    case keyCodes.RIGHT:
+                        paddle.x += 20;
+                        break;
+                }
+            }, false); // eventListener
+            
+            update()    
+            function update(){
+                clear();
+
+                // Executes allBalls function once for each array element (ball1, ball2)
+                allBalls.forEach(function (balls){
+                    balls.draw();
+                    balls.move();
+                    balls.rotate();
+                    balls.resize();
+
+                }); 
+       
+                // Paddle
+                paddle.draw();
+
+                // Bricks
+                collisionDetection();                
+                drawBricks();
+                
+                window.requestAnimationFrame(update) //repeats the function updatePizzas
+            }
+
+        </script>
+
+    </body>
+</html>
