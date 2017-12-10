@@ -12,6 +12,8 @@
 * Multiple moving objects 
 * Sprites 
  
+ ***
+ 
 **Advanced**
   * Collision reactions 
   * Polygon collision detection 
